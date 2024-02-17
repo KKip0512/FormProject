@@ -1,6 +1,6 @@
 ﻿namespace FormProject
 {
-    partial class Form1
+    partial class Form
     {
         /// <summary>
         ///  Required designer variable.
@@ -28,21 +28,32 @@
         /// </summary>
         private void InitializeComponent()
         {
+            GraphPanel = new Panel();
             SuspendLayout();
             // 
-            // Form1
+            // GraphPanel
+            // 
+            GraphPanel.BackColor = SystemColors.Control;
+            GraphPanel.Location = new Point(12, 12);
+            GraphPanel.Name = "GraphPanel";
+            GraphPanel.Size = new Size(600, 600);
+            GraphPanel.TabIndex = 0;
+            GraphPanel.Paint += GraphPanel_Paint;
+            // 
+            // Form
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
-            Name = "Form1";
+            BackColor = SystemColors.ButtonShadow;
+            ClientSize = new Size(1264, 681);
+            Controls.Add(GraphPanel);
+            Name = "Form";
             Text = "Form1";
-            Paint += Form1_Paint;
-            MouseClick += Form1_MouseClick;
-            Resize += Form1_Resize;
             ResumeLayout(false);
         }
 
         #endregion
+
+        private Panel GraphPanel;
     }
 }

@@ -1,47 +1,29 @@
 namespace FormProject
 {
-    public partial class Form1 : Form
+    public partial class Form : System.Windows.Forms.Form
     {
-        private Graphics g;
-        private Point _click1;
-        private bool _flag = true;
+        private readonly Pen _pen = new(Color.Black, 3f);
+        private readonly CoordinateSystem _system;
+        private readonly Bitmap _bitmap;
+        private readonly Graphics _graphics;
 
-        public Form1()
+        public Form()
         {
             InitializeComponent();
-            g = CreateGraphics();
+            _system = new(GraphPanel.Size);
+            _bitmap = new(GraphPanel.Width, GraphPanel.Height);
+            _graphics = Graphics.FromImage(_bitmap);
         }
 
-        private void Form1_Paint(object sender, PaintEventArgs e)
+        private void GraphPanel_Paint(object sender, PaintEventArgs e)
         {
-            g.Clear(Color.Magenta);
-            g.DrawEllipse(Pens.LimeGreen, 0, 0, Width, Height);
-            g.DrawLine(Pens.Tan, 100, 100, 400, 400);
-            //g.DrawPolygon();
-        }
+            // MathF.Pow(MathF.Abs(MathF.Min(MathF.Abs(MathF.Sin(x * MathF.PI / 2)), 1f - MathF.Abs(x))), 0.5f)
 
-        private void Form1_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (_flag)
-            {
-                _click1 = e.Location;
-                _flag = false;
-            }
-            else
-            {
-                g.DrawRectangle(Pens.White, _click1.X, _click1.Y, e.Location.X, e.Location.Y);
-                _flag = true;
-            }
-        }
+            Point[] points = _system.GetPointsOfFunction(x =>
+                MathF.Pow(MathF.Abs(MathF.Min(MathF.Abs(MathF.Sin(x * MathF.PI / 2)), 1f - MathF.Abs(x))), 0.5f));
 
-        private void Form1_Resize(object sender, EventArgs e)
-        {
-
-        }
-
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
-        {
-
+            _graphics.DrawLines(_pen, points);
+            GraphPanel.BackgroundImage = _bitmap;
         }
     }
 }
