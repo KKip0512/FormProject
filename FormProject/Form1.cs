@@ -2,39 +2,27 @@ using System.Drawing.Drawing2D;
 
 namespace FormProject
 {
-    public partial class MyForm : Form
+    public partial class Form : System.Windows.Forms.Form
     {
         private readonly Pen _pen = new(Color.Black, 3f);
-
-        private readonly Pen _axisPen;
-        private readonly Pen _meshPen;
-
         private readonly CoordinateSystem _system;
         private readonly Bitmap _bitmap;
         private readonly Graphics _graphics;
 
-        public MyForm()
+        public Form()
         {
             InitializeComponent();
-
-            DoubleBuffered = true;
-
-            _system = new(GraphDrawingField.Size);
-            _bitmap = new(GraphDrawingField.Width, GraphDrawingField.Height);
+            _system = new(GraphPanel.Size);
+            _bitmap = new(GraphPanel.Width, GraphPanel.Height);
             _graphics = Graphics.FromImage(_bitmap);
-            _graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-            _axisPen = GetAxisPen();
-            _meshPen = GetMeshPen();
         }
 
         private void GraphPanel_Paint(object sender, PaintEventArgs e)
         {
-            _graphics.Clear(Color.White);
-
             // MathF.Pow(MathF.Abs(MathF.Min(MathF.Abs(MathF.Sin(x * MathF.PI / 2)), 1f - MathF.Abs(x))), 0.5f)
+
             Point[] points = _system.GetPointsOfFunction(x =>
-                MathF.Sin(x * MathF.PI));
+                MathF.Pow(MathF.Abs(MathF.Min(MathF.Abs(MathF.Sin(x * MathF.PI / 2)), 1f - MathF.Abs(x))), 0.5f));
 
             _system.DrawAxes(_graphics, _axisPen);
             _system.DrawMeshAndNums(_graphics, _meshPen);
