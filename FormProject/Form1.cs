@@ -34,7 +34,45 @@ namespace FormProject
 
             // MathF.Pow(MathF.Abs(MathF.Min(MathF.Abs(MathF.Sin(x * MathF.PI / 2)), 1f - MathF.Abs(x))), 0.5f)
             Point[] points = _system.GetPointsOfFunction(x =>
-                MathF.Pow(MathF.Abs(MathF.Min(MathF.Abs(MathF.Sin(x * MathF.PI / 2)), 1f - MathF.Abs(x))), 0.5f));
+                MathF.Sin(x * MathF.PI));
+
+            _system.DrawAxes(_graphics, _axisPen);
+            _system.DrawMeshAndNums(_graphics, _meshPen);
+            _graphics.DrawCurve(_pen, points);
+
+            GraphDrawingField.Image = _bitmap;
+        }
+
+        private void ZoomIn_Click(object sender, EventArgs e)
+        {
+            if (_system.Scale <= 1f) _system.Scale /= 2f;
+            else _system.Scale -= 1f;
+            GraphDrawingField.Invalidate();
+        }
+        private void ZoomOut_Click(object sender, EventArgs e)
+        {
+            if (_system.Scale <= 1f) _system.Scale *= 2f;
+            else _system.Scale += 1f;
+            GraphDrawingField.Invalidate();
+        }
+
+        private void FunctionTextBox_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private static Pen GetAxisPen()
+        {
+            Pen pen;
+
+            GraphicsPath graphicsEndPath = new();
+            graphicsEndPath.AddLine(0, 0, -2, -2);
+            graphicsEndPath.AddLine(0, 0, 2, -2);
+
+            pen = new(Color.Black, 3f)
+            {
+                CustomEndCap = new(null, graphicsEndPath)
+            };
 
             _system.DrawAxes(_graphics, _axisPen);
             _system.DrawMeshAndNums(_graphics, _meshPen);

@@ -29,8 +29,8 @@ namespace FormProject
             {
                 float systemX = ConvertPixelFromAnyAxisToSystem(x, SizeOfWindow.Width);
                 float systemY = function(systemX);
-                //if (systemY > Scale) continue;
-                points[x/stride] = ConvertSystemCoordToPixel(new PointF(systemX, systemY));
+                if (systemY > Scale) continue;
+                points[x] = ConvertSystemCoordToPixel(new PointF(systemX, systemY));
             }
 
             return points;
