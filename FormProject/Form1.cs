@@ -1,4 +1,5 @@
 using System.Drawing.Drawing2D;
+using System.Globalization;
 
 namespace FormProject
 {
@@ -12,6 +13,11 @@ namespace FormProject
         private readonly CoordinateSystem _system;
         private readonly Bitmap _bitmap;
         private readonly Graphics _graphics;
+
+        public static readonly NumberFormatInfo numberFormatInfo = new()
+        {
+            NumberDecimalSeparator = "."
+        };
 
         public MyForm()
         {
@@ -32,13 +38,18 @@ namespace FormProject
         {
             _graphics.Clear(Color.White);
 
-            // MathF.Pow(MathF.Abs(MathF.Min(MathF.Abs(MathF.Sin(x * MathF.PI / 2)), 1f - MathF.Abs(x))), 0.5f)
-            Point[] points = _system.GetPointsOfFunction(x =>
-                MathF.Sin(x * MathF.PI));
+            // Math.Pow(Math.Abs(Math.Min(Math.Abs(Math.Sin(x * Math.PI / 2)), 1f - Math.Abs(x))), 0.5f)
 
+            Point[] points;
+            if (_expression != null)
+            {
+                points = _system.GetPointsOfFunction(_expression);
+                _graphics.DrawCurve(_pen, points);
+            }
+
+            _graphics.DrawString(_expression, SystemFonts.DefaultFont, Brushes.Violet, new Point(10, 10));
             _system.DrawAxes(_graphics, _axisPen);
             _system.DrawMeshAndNums(_graphics, _meshPen);
-            _graphics.DrawCurve(_pen, points);
 
             GraphDrawingField.Image = _bitmap;
         }
@@ -56,9 +67,10 @@ namespace FormProject
             GraphDrawingField.Invalidate();
         }
 
+        private string? _expression;
         private void FunctionTextBox_TextChanged(object sender, EventArgs e)
         {
-
+            _expression = FunctionTextBox.Text;
         }
 
         private static Pen GetAxisPen()
