@@ -76,7 +76,7 @@ namespace FormProject
             if (indexOfParenthesis == -1)
             {
                 _functionName = possibleFunctions1Arg[0].Item1;
-                _arguments = [double.Parse(function, MyForm.numberFormatInfo)];
+                _arguments = [MathOperation.CalculateExpression(function)];
                 return;
             }
 

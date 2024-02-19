@@ -40,18 +40,19 @@ namespace FormProject
 
             // Math.Pow(Math.Abs(Math.Min(Math.Abs(Math.Sin(x * Math.PI / 2)), 1f - Math.Abs(x))), 0.5f)
 
-            //_expression = "Pow(Abs(Min(Abs(Sin(x * PI / 2)), 1 - Abs(x))), 0.5)";
+            //_expression = "Pow(Abs(Min(Abs(Sin(x * 3.14 / 2)), 1 - Abs(x))), 0.5)";
+            //_expression = "2 * sin(x)";
+            _system.DrawMeshAndNums(_graphics, _meshPen);
+            _system.DrawAxes(_graphics, _axisPen);
+
             Point[] points;
             if (_expression != null)
             {
                 points = _system.GetPointsOfFunction(_expression);
                 _graphics.DrawLines(_pen, points);
             }
-
             //_graphics.DrawString(_expression, SystemFonts.DefaultFont, Brushes.Violet, new Point(10, 10));
             //_graphics.DrawString(MathOperation.CalculateExpression("").ToString(), SystemFonts.DefaultFont, Brushes.Violet, new Point(10, 10));
-            _system.DrawAxes(_graphics, _axisPen);
-            _system.DrawMeshAndNums(_graphics, _meshPen);
 
             GraphDrawingField.Image = _bitmap;
         }

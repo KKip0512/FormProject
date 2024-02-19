@@ -71,8 +71,9 @@
             // 
             FunctionTextBox.Font = new Font("Segoe UI", 20F);
             FunctionTextBox.Location = new Point(628, 184);
+            FunctionTextBox.Multiline = true;
             FunctionTextBox.Name = "FunctionTextBox";
-            FunctionTextBox.Size = new Size(300, 43);
+            FunctionTextBox.Size = new Size(300, 428);
             FunctionTextBox.TabIndex = 3;
             FunctionTextBox.TextChanged += FunctionTextBox_TextChanged;
             // 

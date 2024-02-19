@@ -26,10 +26,14 @@ namespace FormProject
                 {
                     int argsStartIndex = indicesOfParentheses.Pop();
 
-                    int funcStartIndex = indicesOfParentheses.Count > 0 ? indicesOfParentheses.Peek() + 1 : 0;
+                    int funcStartIndex = argsStartIndex - 1;
+                    while (funcStartIndex >= 0 && _letters.Contains(sb[funcStartIndex]))
+                        funcStartIndex--;
+                    funcStartIndex++;
+
                     string func;
 
-                    if (i != 0 && _letters.Contains(sb[argsStartIndex - 1]))
+                    if (argsStartIndex != 0 && _letters.Contains(sb[argsStartIndex - 1]))
                         func = sb.ToString()[funcStartIndex..(i + 1)];
                     else
                         func = sb.ToString()[(argsStartIndex + 1)..i];
@@ -41,7 +45,8 @@ namespace FormProject
                 }
             }
 
-            return double.Parse(sb.ToString(), MyForm.numberFormatInfo);
+            //return double.Parse(sb.ToString(), MyForm.numberFormatInfo);
+            return new MathFunction(sb.ToString()).Calculate();
         }
         private static string ReplaceXWithValue(string expression, double x)
         {
@@ -49,7 +54,7 @@ namespace FormProject
             if (sb[0] == 'x') sb = sb.Replace("x", x.ToString(MyForm.numberFormatInfo));
             else
             {
-                for (int i = 1; i < expression.Length; i++)
+                for (int i = 1; i < sb.Length; i++)
                 {
                     if (sb[i] == 'x' && !_letters.Contains(sb[i - 1]))
                     {
@@ -59,35 +64,6 @@ namespace FormProject
                 }
             }
             return sb.ToString();
-        }
-
-        public static double GetY1(string expression, double x)
-        {
-
-
-            Stack<int> parenthesisIndices = [];
-            int expressionLength = expression.Length;
-
-            for (int i = 0; i < expressionLength; i++)
-            {
-                if (expression[i] == '(')
-                {
-                    parenthesisIndices.Push(i);
-                }
-                else if (expression[i] == ')')
-                {
-                    int index = parenthesisIndices.Pop();
-                    int funcStartIndex = parenthesisIndices.Count > 0 ? parenthesisIndices.Peek() + 1 : 0;
-
-                    string func = expression.Substring(funcStartIndex, i - funcStartIndex + 1);
-                    expression = expression.Replace(func, new MathFunction(func).Calculate().ToString(MyForm.numberFormatInfo));
-
-                    expressionLength = expression.Length;
-                    i = index;
-                }
-            }
-
-            return double.Parse(expression, MyForm.numberFormatInfo);
         }
     }
 }

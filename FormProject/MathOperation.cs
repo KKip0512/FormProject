@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -58,23 +59,24 @@ namespace FormProject
         }
         private static string CalculateSumAndSub(string expression)
         {
+            bool flag = true;
+            double result = 0;
             StringBuilder sb = new(expression);
-            List<int> minusIndices = [];
-            for (int i = 0; i < expression.Length; i++)
-                if (expression[i] == '-')
-                    minusIndices.Add(i);
-            foreach (int i in minusIndices)
-            {
-                if (i == 0) sb.Insert(i, "0");
-                else if (!nums.Contains(sb[i-1])) sb.Insert(i, "0");
-            }
-            expression = sb.ToString();
 
-            if (expression.Contains(possibleOperations[0].Item1))
-                expression = CalculateOperationsRelatedToOperator(expression, possibleOperations[0].Item1);
-            if (expression.Contains(possibleOperations[1].Item1))
-                expression = CalculateOperationsRelatedToOperator(expression, possibleOperations[1].Item1);
-            return expression;
+            for (int i = 0; i < sb.Length; i++)
+            {
+                if (sb[0] == '-' && flag) { i++; flag = false; }
+                if (i >= sb.Length) break;
+                if (sb[i] == possibleOperations[0].Item1 || sb[i] == possibleOperations[1].Item1)
+                {
+                    result += double.Parse(sb.ToString()[..i], MyForm.numberFormatInfo);
+                    sb.Remove(0, i);
+                    i = 0;
+                    flag = true;
+                }
+            }
+            result += double.Parse(sb.ToString(), MyForm.numberFormatInfo);
+            return result.ToString(MyForm.numberFormatInfo);
         }
         private static string CalculateOperationsRelatedToOperator(string expression, char @operator)
         {
@@ -86,9 +88,10 @@ namespace FormProject
                     int exprStartIndex = i - 1;
                     int exprEndIndex = i + 1;
 
+                    if (expressionB[i + 1] == possibleOperations[1].Item1) exprEndIndex++;
+
                     while (exprStartIndex >= 0 &&
-                        (nums.Contains(expressionB[exprStartIndex]) || expressionB[exprStartIndex] == '.'
-                        || expressionB[exprStartIndex] == '-'))
+                        (nums.Contains(expressionB[exprStartIndex]) || expressionB[exprStartIndex] == '.'))
                     { exprStartIndex--; }
 
                     while (exprEndIndex <= expressionB.Length - 1 &&
@@ -97,7 +100,8 @@ namespace FormProject
 
                     string operation = expressionB.ToString()[(exprStartIndex + 1)..exprEndIndex];
                     expressionB = expressionB.Remove(exprStartIndex + 1, exprEndIndex - exprStartIndex - 1);
-                    expressionB = expressionB.Insert(exprStartIndex + 1, CalculateOperation(operation, @operator));
+                    expressionB = expressionB.Insert(exprStartIndex + 1,
+                        CalculateOperation(operation, @operator).ToString(MyForm.numberFormatInfo));
 
                     i = exprStartIndex + 1;
                 }
@@ -116,7 +120,7 @@ namespace FormProject
                 {
                     int startIndex = indicesOfParentheses.Pop();
                     sb = sb.Remove(startIndex, i - startIndex + 1);
-                    sb = sb.Insert(startIndex, CalculateExpression(sb.ToString()[(startIndex + 1)..i]));    
+                    sb = sb.Insert(startIndex, CalculateExpression(sb.ToString()[(startIndex + 1)..i]));
                     i = startIndex + 1;
                 }
             }
@@ -133,7 +137,8 @@ namespace FormProject
         {
             var mathOperation = possibleOperations[GetIndexOfOperator(operation)];
             string[] operands = operation.Split(mathOperation.Item1);
-            return mathOperation.Item2(double.Parse(operands[0]), double.Parse(operands[1]));
+            return mathOperation.Item2(double.Parse(operands[0], MyForm.numberFormatInfo),
+                double.Parse(operands[1], MyForm.numberFormatInfo));
         }
 
         private static Func<double, double, double> GetOperation(char @operator)
