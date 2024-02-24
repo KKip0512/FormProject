@@ -1,18 +1,20 @@
 using System.Drawing.Drawing2D;
 using System.Globalization;
+using FormProject.Classes;
+using FormProject.Classes.TextToExpression;
 
 namespace FormProject
 {
     public partial class MyForm : Form
     {
-        private readonly Pen _pen = new(Color.Black, 3f);
-
+        private readonly Pen _graphOfFunctionPen = new(Color.Black, 3f);
         private readonly Pen _axisPen;
         private readonly Pen _meshPen;
 
         private readonly CoordinateSystem _system;
         private readonly Bitmap _bitmap;
         private readonly Graphics _graphics;
+        private string? _expression;
 
         public static readonly NumberFormatInfo numberFormatInfo = new()
         {
@@ -38,26 +40,15 @@ namespace FormProject
         {
             _graphics.Clear(Color.White);
 
-            // Math.Pow(Math.Abs(Math.Min(Math.Abs(Math.Sin(x * Math.PI / 2)), 1f - Math.Abs(x))), 0.5f)
-
-            //_expression = "Pow(Abs(Min(Abs(Sin(x * 3.14 / 2)), 1 - Abs(x))), 0.5)";
-            //_expression = "2 * sin(x)";
             _system.DrawMeshAndNums(_graphics, _meshPen);
             _system.DrawAxes(_graphics, _axisPen);
 
-            Point[] points;
+            //_expression = "Pow(Abs(Min(Abs(Sin(x * 3.14 / 2)), 1 - Abs(x))), 0.5)";
             if (_expression != null)
             {
-                points = _system.GetPointsOfFunction(_expression);
-                _graphics.DrawLines(_pen, points);
+                Point[] points = _system.GetPointsOfFunction(_expression);
+                _graphics.DrawLines(_graphOfFunctionPen, points);
             }
-            //_graphics.DrawString(_expression, SystemFonts.DefaultFont, Brushes.Violet, new Point(10, 10));
-            try
-            {
-
-            _graphics.DrawString(MathExpression.Calculate(FunctionTextBox.Text).ToString(), SystemFonts.DefaultFont, Brushes.Violet, new Point(10, 10));
-            }
-            catch {}
 
             GraphDrawingField.Image = _bitmap;
         }
@@ -75,7 +66,6 @@ namespace FormProject
             GraphDrawingField.Invalidate();
         }
 
-        private string? _expression;
         private void FunctionTextBox_TextChanged(object sender, EventArgs e)
         {
             _expression = FunctionTextBox.Text;

@@ -1,12 +1,12 @@
 ﻿using System.Text;
 
-namespace FormProject
+namespace FormProject.Classes.TextToExpression
 {
-    internal class MathExpression(string expression)
+    internal class MathPolynomial(string polynomial)
     {
-        public string Expression { get; } = expression ?? throw new NullReferenceException("Expression was null");
+        public string Polynomial { get; } = polynomial ?? throw new NullReferenceException("Polynomial was null");
 
-        private StringBuilder _expressionBuilder = new(expression.Replace(" ", string.Empty).ToLower());
+        private StringBuilder _polynomialBuilder = new(polynomial.Replace(" ", string.Empty).ToLower());
 
         private const string nums = "0123456789";
         public static readonly Dictionary<char, Func<double, double, double>> possibleOperations = new()
@@ -18,46 +18,46 @@ namespace FormProject
             { '^',               Math.Pow }
         };
 
-        public static double Calculate(string expression) => new MathExpression(expression).Calculate();
+        public static double Calculate(string polynomial) => new MathPolynomial(polynomial).Calculate();
 
         public double Calculate()
         {
-            CalculateExpressionInParentheses();
+            CalculatePolynomialsInParentheses();
             CalculatePow();
             CalculateMultAndDiv();
             CalculateSumAndSub();
 
-            return double.Parse(_expressionBuilder.ToString(), MyForm.numberFormatInfo);
+            return double.Parse(_polynomialBuilder.ToString(), MyForm.numberFormatInfo);
         }
 
         private void CalculatePow()
         {
-            if (_expressionBuilder.ToString().Contains('^'))
+            if (_polynomialBuilder.ToString().Contains('^'))
                 CalculateOperationsRelatedToOperators('^');
         }
         private void CalculateMultAndDiv()
         {
-            if (_expressionBuilder.ToString().Contains('/') || _expressionBuilder.ToString().Contains('*'))
+            if (_polynomialBuilder.ToString().Contains('/') || _polynomialBuilder.ToString().Contains('*'))
                 CalculateOperationsRelatedToOperators('*', '/');
         }
         private void CalculateSumAndSub()
         {
             double result = 0;
-            _expressionBuilder.Replace("-", "+-");
-            foreach (var num in _expressionBuilder.ToString().Split('+'))
+            _polynomialBuilder.Replace("-", "+-");
+            foreach (var num in _polynomialBuilder.ToString().Split('+'))
                 result += num.Length > 0 ? double.Parse(num, MyForm.numberFormatInfo) : 0;
 
-            _expressionBuilder = new(result.ToString(MyForm.numberFormatInfo));
+            _polynomialBuilder = new(result.ToString(MyForm.numberFormatInfo));
         }
         private void CalculateOperationsRelatedToOperators(params char[] operators)
         {
             int startOfOperation, endOfOperation;
 
-            for (int i = 0; i < _expressionBuilder.Length; i++)
+            for (int i = 0; i < _polynomialBuilder.Length; i++)
             {
                 if (!IsRightOperator(i, operators)) continue;
 
-                char @operator = _expressionBuilder[i];
+                char @operator = _polynomialBuilder[i];
                 startOfOperation = GetStartOfOperation(i);
                 endOfOperation = GetEndOfOperation(i);
                 ReplaceOperationWithResult(startOfOperation, endOfOperation, @operator);
@@ -69,7 +69,7 @@ namespace FormProject
         {
             bool isRightOperator = false;
             foreach (char op in operators)
-                if (_expressionBuilder[index] == op)
+                if (_polynomialBuilder[index] == op)
                 { isRightOperator = true; break; }
             return isRightOperator;
         }
@@ -79,9 +79,9 @@ namespace FormProject
 
             do { startOfOperation--; }
             while (startOfOperation > 0 &&
-                (nums.Contains(_expressionBuilder[startOfOperation]) || _expressionBuilder[startOfOperation] == '.'));
+                (nums.Contains(_polynomialBuilder[startOfOperation]) || _polynomialBuilder[startOfOperation] == '.'));
 
-            if (_expressionBuilder[startOfOperation] != '-' && startOfOperation > 0) startOfOperation++;
+            if (_polynomialBuilder[startOfOperation] != '-' && startOfOperation > 0) startOfOperation++;
 
             return startOfOperation;
         }
@@ -89,37 +89,37 @@ namespace FormProject
         {
             int endOfOperation = operatorIndex + 1;
 
-            if (_expressionBuilder[endOfOperation] == '-') endOfOperation++;
+            if (_polynomialBuilder[endOfOperation] == '-') endOfOperation++;
 
-            while (endOfOperation < _expressionBuilder.Length &&
-                (nums.Contains(_expressionBuilder[endOfOperation]) || _expressionBuilder[endOfOperation] == '.'))
+            while (endOfOperation < _polynomialBuilder.Length &&
+                (nums.Contains(_polynomialBuilder[endOfOperation]) || _polynomialBuilder[endOfOperation] == '.'))
             { endOfOperation++; }
 
             return --endOfOperation;
         }
         private void ReplaceOperationWithResult(int startOfOperation, int endOfOperation, char @operator)
         {
-            string operation = _expressionBuilder.ToString()[startOfOperation..(endOfOperation + 1)];
-            _expressionBuilder.Remove(startOfOperation, endOfOperation - startOfOperation + 1);
-            _expressionBuilder.Insert(startOfOperation,
+            string operation = _polynomialBuilder.ToString()[startOfOperation..(endOfOperation + 1)];
+            _polynomialBuilder.Remove(startOfOperation, endOfOperation - startOfOperation + 1);
+            _polynomialBuilder.Insert(startOfOperation,
                 CalculateOperation(operation, @operator).ToString("0.###############", MyForm.numberFormatInfo));
         }
 
-        private void CalculateExpressionInParentheses()
+        private void CalculatePolynomialsInParentheses()
         {
-            if (!_expressionBuilder.ToString().Contains('(')) return;
+            if (!_polynomialBuilder.ToString().Contains('(')) return;
 
             Stack<int> indicesOfParentheses = [];
-            for (int i = 0; i < _expressionBuilder.Length; i++)
+            for (int i = 0; i < _polynomialBuilder.Length; i++)
             {
-                if (_expressionBuilder[i] == '(') indicesOfParentheses.Push(i);
-                else if (_expressionBuilder[i] == ')')
+                if (_polynomialBuilder[i] == '(') indicesOfParentheses.Push(i);
+                else if (_polynomialBuilder[i] == ')')
                 {
                     int startIndex = indicesOfParentheses.Pop();
-                    string expression = _expressionBuilder.ToString()[(startIndex+1)..i];
-                    _expressionBuilder.Remove(startIndex, i - startIndex + 1);
-                    _expressionBuilder.Insert(startIndex,
-                        Calculate(expression).ToString(MyForm.numberFormatInfo));
+                    string polynomial = _polynomialBuilder.ToString()[(startIndex + 1)..i];
+                    _polynomialBuilder.Remove(startIndex, i - startIndex + 1);
+                    _polynomialBuilder.Insert(startIndex,
+                        Calculate(polynomial).ToString(MyForm.numberFormatInfo));
                     i = startIndex;
                 }
             }
