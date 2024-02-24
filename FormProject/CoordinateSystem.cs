@@ -37,7 +37,7 @@ namespace FormProject
         }
         public Point[] GetPointsOfFunction(string expression)
         {
-            int stride = 2;
+            int stride = 1;
             Point[] points = new Point[SizeOfWindow.Width / stride + 1];
             try
             {
@@ -49,7 +49,8 @@ namespace FormProject
                     points[x / stride] = ConvertSystemCoordToPixel(new PointF((float)systemX, (float)systemY));
                 }
             }
-            catch { }
+            catch
+            { }
             return points;
         }
 

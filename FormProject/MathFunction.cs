@@ -76,7 +76,7 @@ namespace FormProject
             if (indexOfParenthesis == -1)
             {
                 _functionName = possibleFunctions1Arg[0].Item1;
-                _arguments = [MathOperation.CalculateExpression(function)];
+                _arguments = [MathExpression.Calculate(function)];
                 return;
             }
 
@@ -85,7 +85,7 @@ namespace FormProject
             string[] args = function.Substring(indexOfParenthesis + 1, function.Length - indexOfParenthesis - 2).Split(',');
             _arguments = new double[args.Length];
             for (int i = 0; i < args.Length; i++)
-                _arguments[i] = MathOperation.CalculateExpression(args[i]);
+                _arguments[i] = MathExpression.Calculate(args[i]);
         }
 
         public MathFunction(string functionName, double argument1)

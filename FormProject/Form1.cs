@@ -52,7 +52,12 @@ namespace FormProject
                 _graphics.DrawLines(_pen, points);
             }
             //_graphics.DrawString(_expression, SystemFonts.DefaultFont, Brushes.Violet, new Point(10, 10));
-            //_graphics.DrawString(MathOperation.CalculateExpression("").ToString(), SystemFonts.DefaultFont, Brushes.Violet, new Point(10, 10));
+            try
+            {
+
+            _graphics.DrawString(MathExpression.Calculate(FunctionTextBox.Text).ToString(), SystemFonts.DefaultFont, Brushes.Violet, new Point(10, 10));
+            }
+            catch {}
 
             GraphDrawingField.Image = _bitmap;
         }
