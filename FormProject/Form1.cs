@@ -1,7 +1,6 @@
 using System.Drawing.Drawing2D;
 using System.Globalization;
 using FormProject.Classes;
-using FormProject.Classes.TextToExpression;
 
 namespace FormProject
 {
@@ -55,14 +54,18 @@ namespace FormProject
 
         private void ZoomIn_Click(object sender, EventArgs e)
         {
-            if (_system.Scale <= 1f) _system.Scale /= 2f;
-            else _system.Scale -= 1f;
+            if (MathF.Max(_system.Scale.Width, _system.Scale.Height) <= 1f)
+                _system.Rescale(_system.Scale.Width / 2f, _system.Scale.Height / 2f);
+            else
+                _system.Rescale(_system.Scale.Width - 1f, _system.Scale.Height - 1f);
             GraphDrawingField.Invalidate();
         }
         private void ZoomOut_Click(object sender, EventArgs e)
         {
-            if (_system.Scale <= 1f) _system.Scale *= 2f;
-            else _system.Scale += 1f;
+            if (MathF.Max(_system.Scale.Width, _system.Scale.Height) <= 1f)
+                _system.Rescale(_system.Scale.Width * 2f, _system.Scale.Height * 2f);
+            else
+                _system.Rescale(_system.Scale.Width + 1f, _system.Scale.Height + 1f);
             GraphDrawingField.Invalidate();
         }
 
