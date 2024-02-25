@@ -7,29 +7,41 @@ namespace FormProject.Classes
         public Size SizeOfWindow { get; private set; }
 
         public double Scale { get; set; }
-        public Point Position { get; set; }
+        public PointF Position { get; private set; }
+        //public RectangleF Bounds => new((float)-Scale + Position.X, (float)Scale + Position.Y, (float)Scale, (float)Scale);
+        public RectangleF Bounds => new((float)-Scale + Position.X, (float)Scale + Position.Y, (float)Scale * 2, (float)-Scale * 2);
 
         public CoordinateSystem(Size sizeOfWindow)
         {
-            Scale = 3f;
-            Position = new(0);
+            Scale = 3d;
+            Position = new PointF(0f, 0f);
             SizeOfWindow = sizeOfWindow;
         }
 
-        public Point[] GetPointsOfFunction(Func<double, double> expression)
+        public void MovePosition(int pixelX, int pixelY)
+        {
+            float multiplier = 1 / 100f;
+            PointF a = new(pixelX * multiplier, pixelY * multiplier);
+            PointF oldPositon = Position;
+            oldPositon.X += a.X;
+            oldPositon.Y -= a.Y;
+            Position = oldPositon;
+        }
+
+        /*public Point[] GetPointsOfFunction(Func<double, double> expression)
         {
             int stride = 2;
             Point[] points = new Point[SizeOfWindow.Width / stride + 1];
             for (int x = 0; x < SizeOfWindow.Width + stride; x += stride)
             {
-                double systemX = ConvertPixelFromAnyAxisToSystem(x, SizeOfWindow.Width);
+                double systemX = ConvertPixelAxisToSystem(x, SizeOfWindow.Width);
                 double systemY = expression(systemX);
                 //if (systemY >= Scale) continue;
                 points[x / stride] = ConvertSystemCoordToPixel(new PointF((float)systemX, (float)systemY));
             }
 
             return points;
-        }
+        }*/
         public Point[] GetPointsOfFunction(string expression)
         {
             int stride = 1;
@@ -38,7 +50,7 @@ namespace FormProject.Classes
             {
                 for (int x = 0; x < SizeOfWindow.Width + stride; x += stride)
                 {
-                    double systemX = ConvertPixelFromAnyAxisToSystem(x, SizeOfWindow.Width);
+                    double systemX = ConvertPixelCoordToSystem(new Point(x, 0)).X;
                     double systemY = FunctionCompiler.GetY(expression, systemX);
                     //if (systemY >= Scale) continue;
                     points[x / stride] = ConvertSystemCoordToPixel(new PointF((float)systemX, (float)systemY));
@@ -51,83 +63,83 @@ namespace FormProject.Classes
 
         public void DrawAxes(Graphics graphics, Pen pen)
         {
-            graphics.DrawLine(pen, 0, SizeOfWindow.Height / 2, SizeOfWindow.Width, SizeOfWindow.Height / 2);
-            graphics.DrawLine(pen, SizeOfWindow.Width / 2, SizeOfWindow.Height, SizeOfWindow.Width / 2, 0);
+            Point abscissaStart = ConvertSystemCoordToPixel(new PointF(Bounds.Left, 0));
+            Point abscissaEnd = ConvertSystemCoordToPixel(new PointF(Bounds.Right, 0));
+            Point ordinateStart = ConvertSystemCoordToPixel(new PointF(0, Bounds.Bottom));
+            Point ordinateEnd = ConvertSystemCoordToPixel(new PointF(0, Bounds.Top));
+            graphics.DrawLine(pen, abscissaStart, abscissaEnd);
+            graphics.DrawLine(pen, ordinateStart, ordinateEnd);
         }
         public void DrawMeshAndNums(Graphics graphics, Pen pen)
         {
-            Point zeroPos = ConvertSystemCoordToPixel(new(0, 0));
-            zeroPos.Offset(6, 6);
+            Point centerPos = ConvertSystemCoordToPixel(new(0, 0));
+            centerPos.Offset(6, 6);
             graphics.DrawString(0.ToString(), SystemFonts.DefaultFont,
-                Brushes.Black, zeroPos);
+                Brushes.Black, centerPos);
 
-            for (double xNegative = -0.5f; xNegative > -Scale; xNegative -= 0.5f)
+            for (float xNegative = Position.X; xNegative > Bounds.Left; xNegative -= 0.5f)
             {
                 graphics.DrawLine(pen,
-                    ConvertSystemCoordToPixel(new((float)xNegative, (float)Scale)),
-                    ConvertSystemCoordToPixel(new((float)xNegative, (float)-Scale)));
+                    ConvertSystemCoordToPixel(new(xNegative, Bounds.Top)),
+                    ConvertSystemCoordToPixel(new(xNegative, Bounds.Bottom)));
 
-                Point numPos = ConvertSystemCoordToPixel(new((float)xNegative, 0));
+                Point numPos = ConvertSystemCoordToPixel(new(xNegative, 0));
                 numPos.Offset(6, 6);
 
-                graphics.DrawString(xNegative.ToString(), SystemFonts.DefaultFont,
+                graphics.DrawString(xNegative.ToString("0.##"), SystemFonts.DefaultFont,
                     Brushes.Black, numPos);
             }
-            for (double xPositive = 0.5f; xPositive < Scale; xPositive += 0.5f)
+            for (float xPositive = Position.X; xPositive < Bounds.Right; xPositive += 0.5f)
             {
                 graphics.DrawLine(pen,
-                    ConvertSystemCoordToPixel(new((float)xPositive, (float)Scale)),
-                    ConvertSystemCoordToPixel(new((float)xPositive, (float)-Scale)));
+                    ConvertSystemCoordToPixel(new(xPositive, Bounds.Top)),
+                    ConvertSystemCoordToPixel(new(xPositive, Bounds.Bottom)));
 
-                Point numPos = ConvertSystemCoordToPixel(new((float)xPositive, 0));
+                Point numPos = ConvertSystemCoordToPixel(new(xPositive, 0));
                 numPos.Offset(6, 6);
 
-                graphics.DrawString(xPositive.ToString(), SystemFonts.DefaultFont,
+                graphics.DrawString(xPositive.ToString("0.##"), SystemFonts.DefaultFont,
                     Brushes.Black, numPos);
             }
 
-            for (double yNegative = -0.5f; yNegative > -Scale; yNegative -= 0.5f)
+            for (float yNegative = Position.Y; yNegative > Bounds.Bottom; yNegative -= 0.5f)
             {
                 graphics.DrawLine(pen,
-                    ConvertSystemCoordToPixel(new((float)Scale, (float)yNegative)),
-                    ConvertSystemCoordToPixel(new((float)-Scale, (float)yNegative)));
+                    ConvertSystemCoordToPixel(new(Bounds.Left, yNegative)),
+                    ConvertSystemCoordToPixel(new(Bounds.Right, yNegative)));
 
-                Point numPos = ConvertSystemCoordToPixel(new(0, (float)yNegative));
+                Point numPos = ConvertSystemCoordToPixel(new(0, yNegative));
                 numPos.Offset(6, 6);
 
-                graphics.DrawString(yNegative.ToString(), SystemFonts.DefaultFont,
+                graphics.DrawString(yNegative.ToString("0.##"), SystemFonts.DefaultFont,
                     Brushes.Black, numPos);
             }
-            for (double yPositive = 0.5f; yPositive < Scale; yPositive += 0.5f)
+            for (float yPositive = Position.Y; yPositive < Bounds.Top; yPositive += 0.5f)
             {
                 graphics.DrawLine(pen,
-                    ConvertSystemCoordToPixel(new((float)Scale, (float)yPositive)),
-                    ConvertSystemCoordToPixel(new((float)-Scale, (float)yPositive)));
+                    ConvertSystemCoordToPixel(new(Bounds.Left, yPositive)),
+                    ConvertSystemCoordToPixel(new(Bounds.Right, yPositive)));
 
-                Point numPos = ConvertSystemCoordToPixel(new(0, (float)yPositive));
+                Point numPos = ConvertSystemCoordToPixel(new(0, yPositive));
                 numPos.Offset(6, 6);
 
-                graphics.DrawString(yPositive.ToString(), SystemFonts.DefaultFont,
+                graphics.DrawString(yPositive.ToString("0.##"), SystemFonts.DefaultFont,
                     Brushes.Black, numPos);
             }
         }
 
-        private int ConvertSystemFromAnyAxisToPixel(double systemPos, int maxPixels)
-        {
-            return (int)Math.Round((systemPos + Scale) / 2 * maxPixels / Scale);
-        }
         private Point ConvertSystemCoordToPixel(PointF systemCoord)
         {
-            int x = ConvertSystemFromAnyAxisToPixel(systemCoord.X, SizeOfWindow.Width);
-            int y = SizeOfWindow.Height - ConvertSystemFromAnyAxisToPixel(systemCoord.Y, SizeOfWindow.Height);
+            int x = ConvertSystemAxisToPixel(systemCoord.X - Position.X, SizeOfWindow.Width);
+            int y = SizeOfWindow.Height - ConvertSystemAxisToPixel(systemCoord.Y - Position.Y, SizeOfWindow.Height);
 
             return new Point(x, y);
         }
-
-        private double ConvertPixelFromAnyAxisToSystem(int pixelPos, int maxPixels)
+        private int ConvertSystemAxisToPixel(double systemPos, int maxPixels)
         {
-            return (double)pixelPos / maxPixels * Scale * 2 - Scale;
+            return (int)Math.Round((systemPos + Scale) / 2 * maxPixels / Scale);
         }
+
         /// <summary>
         /// Мб не работает
         /// </summary>
@@ -135,10 +147,14 @@ namespace FormProject.Classes
         /// <returns></returns>
         private PointF ConvertPixelCoordToSystem(Point pixelCoord)
         {
-            double x = ConvertPixelFromAnyAxisToSystem(pixelCoord.X, SizeOfWindow.Width);
-            double y = SizeOfWindow.Height - ConvertPixelFromAnyAxisToSystem(pixelCoord.Y, SizeOfWindow.Height);
+            float x = (float)ConvertPixelAxisToSystem(pixelCoord.X, SizeOfWindow.Width) + Position.X;
+            float y = (float)(SizeOfWindow.Height - ConvertPixelAxisToSystem(pixelCoord.Y, SizeOfWindow.Height) + Position.Y);
 
-            return new PointF((float)x, (float)y);
+            return new PointF(x, y);
+        }
+        private double ConvertPixelAxisToSystem(int pixelPos, int maxPixels)
+        {
+            return (double)pixelPos / maxPixels * Scale * 2 - Scale;
         }
     }
 }

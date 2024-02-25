@@ -91,5 +91,27 @@ namespace FormProject
             Pen pen = new(Color.DarkGray, 1f);
             return pen;
         }
+
+
+        private bool _isMouseDown = false;
+        private void GraphDrawingField_MouseDown(object sender, MouseEventArgs e)
+        {
+            _isMouseDown = true;
+        }
+
+        private void GraphDrawingField_MouseUp(object sender, MouseEventArgs e)
+        {
+            _isMouseDown = false;
+        }
+        private int _oldX;
+        private int _oldY;
+        private void GraphDrawingField_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isMouseDown) 
+                _system.MovePosition(_oldX - e.X, _oldY - e.Y);
+
+            _oldX = e.X;
+            _oldY = e.Y;
+        }
     }
 }

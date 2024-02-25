@@ -66,6 +66,9 @@
             GraphDrawingField.TabIndex = 2;
             GraphDrawingField.TabStop = false;
             GraphDrawingField.Paint += GraphPanel_Paint;
+            GraphDrawingField.MouseDown += GraphDrawingField_MouseDown;
+            GraphDrawingField.MouseMove += GraphDrawingField_MouseMove;
+            GraphDrawingField.MouseUp += GraphDrawingField_MouseUp;
             // 
             // FunctionTextBox
             // 
