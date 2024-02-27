@@ -1,108 +1,80 @@
 ﻿using FormProject.Classes.TextToExpression;
-using Size = FormProject.Classes.Emplacement.Size;
-using SizeF = FormProject.Classes.Emplacement.SizeF;
-using PointF = FormProject.Classes.Emplacement.PointF;
-using PointFS = System.Drawing.PointF;
-using System.Drawing;
 
 namespace FormProject.Classes
 {
     internal sealed class CoordinateSystem
     {
-        public Size SizeOfWindow { get; private set; }
-        public PointF Position { get; private set; }
-        public SizeF Scale { get; private set; }
+        private readonly Reference<Size> _sizeOfWindow;
+        private readonly Reference<PointF> _position;
+        private readonly Reference<SizeF> _scale;
+
+        public Size SizeOfWindow { get => _sizeOfWindow.Value; private set => _sizeOfWindow.Value = value; }
+        public PointF Position { get => _position.Value; private set => _position.Value = value; }
+        public SizeF Scale { get => _scale.Value; private set => _scale.Value = value; }
 
         public PointConverter PointConverter { get; }
-        public RectangleF Bounds => new((float)-Scale.Width + Position.X, (float)Scale.Height + Position.Y, (float)Scale.Width * 2, (float)-Scale.Height * 2);
+        public RectangleF Bounds => new(
+            (float)-Scale.Width + Position.X, (float)Scale.Height + Position.Y, (float)Scale.Width * 2, (float)-Scale.Height * 2);
 
-        public CoordinateSystem(System.Drawing.Size sizeOfWindow)
+        public CoordinateSystem(Size sizeOfWindow)
         {
-            Scale = new SizeF(3f, 3f);
-            Position = new PointF(0f, 0f);
-            SizeOfWindow = new(sizeOfWindow);
-            PointConverter = new PointConverter(SizeOfWindow, Scale, Position);
-        }
-
-        public void MovePosition(int pixelX, int pixelY)
-        {
-            float multiplier = 1 / 100f;
-            PointF a = new(pixelX * multiplier, pixelY * multiplier);
-            PointF oldPositon = Position;
-            oldPositon.X += a.X;
-            oldPositon.Y -= a.Y;
-            Position = oldPositon;
+            _scale = new(new SizeF(3f, 3f));
+            _position = new(new PointF(0f, 0f));
+            _sizeOfWindow = new(sizeOfWindow);
+            PointConverter = new PointConverter(_sizeOfWindow, _scale, _position);
         }
 
         public Point[] GetPointsOfFunction(string expression)
         {
             int stride = 1;
             Point[] points = new Point[SizeOfWindow.Width / stride + 1];
-            try
+            for (int x = 0; x < SizeOfWindow.Width + stride; x += stride)
             {
-                for (int x = 0; x < SizeOfWindow.Width + stride; x += stride)
-                {
-                    float xCoord = PixelPositionToCoordinate(new Point(x, 0)).X;
-                    float yCoord = (float)FunctionCompiler.GetY(expression, xCoord);
-                    //if (systemY >= Scale) continue;
-                    points[x / stride] = CoordinateToPixelPosition(new PointFS(xCoord, yCoord));
-                }
+                float xCoord = PointConverter.PixelPositionToCoordinate(new Point(x, 0)).X;
+                float yCoord = (float)FunctionCompiler.GetY(expression, xCoord);
+                //if (systemY >= Scale) continue;
+                points[x / stride] = PointConverter.CoordinateToPixelPosition(new PointF(xCoord, yCoord));
             }
-            catch { }
             return points;
         }
 
-
-
-
-        public Point CoordinateToPixelPosition(PointFS coordinate)
+        public void MovePosition(int pixelX, int pixelY)
         {
-            int x = (int)Math.Round(
-                (coordinate.X - Position.X + Scale.Width) / 2 * SizeOfWindow.Width / Scale.Width);
+            float multiplier = 1 / 100f;
+            Position = new(Position.X + pixelX * multiplier, Position.Y - pixelY * multiplier);
+        }
+        public void Rescale(float x, float y) => Scale = new(x, y);
 
-            int y = (int)(SizeOfWindow.Height - Math.Round(
-                (coordinate.Y - Position.Y + Scale.Height) / 2 * SizeOfWindow.Height / Scale.Height));
-
-            return new Point(x, y);
+        public (Point, Point) GetAbcissaPoints()
+        {
+            Point abscissaStart = PointConverter.CoordinateToPixelPosition(new PointF(Bounds.Left, 0));
+            Point abscissaEnd = PointConverter.CoordinateToPixelPosition(new PointF(Bounds.Right, 0));
+            return (abscissaStart, abscissaEnd);
+        }
+        public (Point, Point) GetOrdinatePoints()
+        {
+            Point ordinateStart = PointConverter.CoordinateToPixelPosition(new PointF(0, Bounds.Bottom));
+            Point ordinateEnd = PointConverter.CoordinateToPixelPosition(new PointF(0, Bounds.Top));
+            return (ordinateStart, ordinateEnd);
         }
 
-        // PixelPositionToCoordinate != ConvertPixelCoordToSystem И Я НЕ ПОНИМАЮ ПОЧЕМУ
-        public PointFS PixelPositionToCoordinate(Point pixelPosition)
+        public (Point, Point)[] GetMeshXPoints()
         {
-            float x = (pixelPosition.X / SizeOfWindow.Width * Scale.Width * 2 - Scale.Width) + Position.X;
-            float y = (SizeOfWindow.Height - (pixelPosition.Y / SizeOfWindow.Height * Scale.Height * 2 - Scale.Height)) + Position.Y;
 
-            return new PointFS(x, y);
         }
-        private PointFS ConvertPixelCoordToSystem(Point pixelCoord)
+        public (Point, Point)[] GetMeshYPoints()
         {
-            float x = (float)ConvertPixelAxisToSystem(pixelCoord.X, SizeOfWindow.Width) + Position.X;
-            float y = (float)(SizeOfWindow.Height - ConvertPixelAxisToSystem(pixelCoord.Y, SizeOfWindow.Height) + Position.Y);
 
-            return new PointFS(x, y);
         }
-        private double ConvertPixelAxisToSystem(int pixelPos, int maxPixels)
+        public Point[] GetCoordinateDesignationXPoints()
         {
-            return (double)pixelPos / maxPixels * Scale.Width * 2 - Scale.Width;
+            Point[] points = new Point[Scale.Width * 2];
+        }
+        public Point[] GetCoordinateDesignationYPoints()
+        {
+            Point[] points = new Point[Scale * 2];
         }
 
-
-
-
-
-
-
-        public void Rescale(float x ,float y) => Scale = new(x, y);
-
-        public void DrawAxes(Graphics graphics, Pen pen)
-        {
-            Point abscissaStart = PointConverter.CoordinateToPixelPosition(new PointFS(Bounds.Left, 0));
-            Point abscissaEnd = PointConverter.CoordinateToPixelPosition(new PointFS(Bounds.Right, 0));
-            Point ordinateStart = PointConverter.CoordinateToPixelPosition(new PointFS(0, Bounds.Bottom));
-            Point ordinateEnd = PointConverter.CoordinateToPixelPosition(new PointFS(0, Bounds.Top));
-            graphics.DrawLine(pen, abscissaStart, abscissaEnd);
-            graphics.DrawLine(pen, ordinateStart, ordinateEnd);
-        }
         public void DrawMeshAndNums(Graphics graphics, Pen pen)
         {
             Point centerPos = PointConverter.CoordinateToPixelPosition(new(0, 0));

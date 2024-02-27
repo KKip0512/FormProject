@@ -28,11 +28,9 @@ namespace FormProject.Classes.TextToExpression
                 {
                     int parenthesisIndex = indicesOfParentheses.Pop();
                     int funcStartIndex = GetFunctionStartIndex(parenthesisIndex);
+                    string function = GetFunction(parenthesisIndex, funcStartIndex, i);
 
-                    string func = GetFunction(parenthesisIndex, funcStartIndex, i);
-                    var a = MathFunction.Calculate(func);
-                    _expressionBuilder.Replace(func, a.ToString("0.###############", MyForm.numberFormatInfo));
-
+                    _expressionBuilder.Replace(function, StringParser.FromDouble(MathFunction.Calculate(function)));
                     i = funcStartIndex;
                 }
             }
@@ -59,7 +57,7 @@ namespace FormProject.Classes.TextToExpression
 
         private StringBuilder ReplaceVariableWithValue(string variable, double value)
         {
-            string valueAsString = value.ToString(MyForm.numberFormatInfo);
+            string valueAsString = StringParser.FromDouble(value);
 
             if (IsStartOfVariable(variable, 0)) _expressionBuilder.Remove(0, variable.Length).Insert(0, valueAsString);
             for (int i = 1; i < _expressionBuilder.Length; i++)

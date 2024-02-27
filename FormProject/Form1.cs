@@ -15,11 +15,6 @@ namespace FormProject
         private readonly Graphics _graphics;
         private string? _expression;
 
-        public static readonly NumberFormatInfo numberFormatInfo = new()
-        {
-            NumberDecimalSeparator = "."
-        };
-
         public MyForm()
         {
             InitializeComponent();
@@ -45,8 +40,12 @@ namespace FormProject
             //_expression = "Pow(Abs(Min(Abs(Sin(x * 3.14 / 2)), 1 - Abs(x))), 0.5)";
             if (_expression != null)
             {
-                Point[] points = _system.GetPointsOfFunction(_expression);
-                _graphics.DrawLines(_graphOfFunctionPen, points);
+                try
+                {
+                    Point[] points = _system.GetPointsOfFunction(_expression);
+                    _graphics.DrawLines(_graphOfFunctionPen, points);
+                }
+                catch { }
             }
 
             GraphDrawingField.Image = _bitmap;
@@ -110,7 +109,7 @@ namespace FormProject
         private int _oldY;
         private void GraphDrawingField_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_isMouseDown) 
+            if (_isMouseDown)
                 _system.MovePosition(_oldX - e.X, _oldY - e.Y);
 
             _oldX = e.X;
