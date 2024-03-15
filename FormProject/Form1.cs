@@ -1,5 +1,4 @@
 using System.Drawing.Drawing2D;
-using System.Globalization;
 using FormProject.Classes;
 
 namespace FormProject
@@ -34,10 +33,21 @@ namespace FormProject
         {
             _graphics.Clear(Color.White);
 
-            _system.DrawMeshAndNums(_graphics, _meshPen);
-            _system.DrawAxes(_graphics, _axisPen);
+            //_system.DrawMeshAndNums(_graphics, _meshPen);
+            foreach (LineSegment line in _system.GetMeshXSegments())
+                _graphics.DrawLine(_meshPen, line);
+            foreach (LineSegment line in _system.GetMeshYSegments())
+                _graphics.DrawLine(_meshPen, line);
 
-            //_expression = "Pow(Abs(Min(Abs(Sin(x * 3.14 / 2)), 1 - Abs(x))), 0.5)";
+            _graphics.DrawLine(_axisPen, _system.GetAbcissaSegment());
+            _graphics.DrawLine(_axisPen, _system.GetOrdinateSegment());
+
+            /*foreach (Point position in _system.GetCoordinateDesignationXPoints())
+                _graphics.DrawString("0", SystemFonts.DefaultFont, Brushes.DarkRed, position);
+            foreach (Point position in _system.GetCoordinateDesignationYPoints())
+                _graphics.DrawString("0", SystemFonts.DefaultFont, Brushes.DarkRed, position);*/
+
+            //Pow(Abs(Min(Abs(Sin(x * PI/2)), 1-Abs(x))), 0.5)
             if (_expression != null)
             {
                 try

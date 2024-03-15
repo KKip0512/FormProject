@@ -12,16 +12,17 @@ namespace FormProject.Classes
         public PointF Position { get => _position.Value; private set => _position.Value = value; }
         public SizeF Scale { get => _scale.Value; private set => _scale.Value = value; }
 
-        public PointConverter PointConverter { get; }
         public RectangleF Bounds => new(
             (float)-Scale.Width + Position.X, (float)Scale.Height + Position.Y, (float)Scale.Width * 2, (float)-Scale.Height * 2);
 
+        public CoordinatePointConverter Converter { get; }
+
         public CoordinateSystem(Size sizeOfWindow)
         {
-            _scale = new(new SizeF(3f, 3f));
+            _scale = new(new SizeF(10f, 10f));
             _position = new(new PointF(0f, 0f));
             _sizeOfWindow = new(sizeOfWindow);
-            PointConverter = new PointConverter(_sizeOfWindow, _scale, _position);
+            Converter = new CoordinatePointConverter(_sizeOfWindow, _scale, _position);
         }
 
         public Point[] GetPointsOfFunction(string expression)
@@ -30,107 +31,98 @@ namespace FormProject.Classes
             Point[] points = new Point[SizeOfWindow.Width / stride + 1];
             for (int x = 0; x < SizeOfWindow.Width + stride; x += stride)
             {
-                float xCoord = PointConverter.PixelPositionToCoordinate(new Point(x, 0)).X;
+                float xCoord = Converter.PixelToCoordinate(new Point(x, 0)).X;
                 float yCoord = (float)FunctionCompiler.GetY(expression, xCoord);
                 //if (systemY >= Scale) continue;
-                points[x / stride] = PointConverter.CoordinateToPixelPosition(new PointF(xCoord, yCoord));
+                points[x / stride] = Converter.CoordinateToPixel(new PointF(xCoord, yCoord));
             }
             return points;
         }
 
         public void MovePosition(int pixelX, int pixelY)
         {
-            float multiplier = 1 / 100f;
+            float multiplier = 1 / 500f * MathF.Min(Scale.Width, Scale.Height);
             Position = new(Position.X + pixelX * multiplier, Position.Y - pixelY * multiplier);
         }
         public void Rescale(float x, float y) => Scale = new(x, y);
 
-        public (Point, Point) GetAbcissaPoints()
+        public LineSegment GetAbcissaSegment()
         {
-            Point abscissaStart = PointConverter.CoordinateToPixelPosition(new PointF(Bounds.Left, 0));
-            Point abscissaEnd = PointConverter.CoordinateToPixelPosition(new PointF(Bounds.Right, 0));
-            return (abscissaStart, abscissaEnd);
+            Point abscissaStart = Converter.CoordinateToPixel(new PointF(Bounds.Left, 0));
+            Point abscissaEnd = Converter.CoordinateToPixel(new PointF(Bounds.Right, 0));
+            return new LineSegment(abscissaStart, abscissaEnd);
         }
-        public (Point, Point) GetOrdinatePoints()
+        public LineSegment GetOrdinateSegment()
         {
-            Point ordinateStart = PointConverter.CoordinateToPixelPosition(new PointF(0, Bounds.Bottom));
-            Point ordinateEnd = PointConverter.CoordinateToPixelPosition(new PointF(0, Bounds.Top));
-            return (ordinateStart, ordinateEnd);
+            Point ordinateStart = Converter.CoordinateToPixel(new PointF(0, Bounds.Bottom));
+            Point ordinateEnd = Converter.CoordinateToPixel(new PointF(0, Bounds.Top));
+            return new LineSegment(ordinateStart, ordinateEnd);
         }
 
-        public (Point, Point)[] GetMeshXPoints()
+        public LineSegment[] GetMeshXSegments()
         {
+            const int maxAmountOfSegmentsInOneHalf = 10;
+            float distanceBetweenSegments = Scale.Width / maxAmountOfSegmentsInOneHalf;
 
+            //float start = distanceBetweenSegments *
+            //    (MathF.Round(Position.X / distanceBetweenSegments) - maxAmountOfSegmentsInOneHalf - 1);
+            float s = MathF.Max(Scale.Width, Scale.Height) / 10 + 1;
+            float start = distanceBetweenSegments *
+                (MathF.Round(Position.X / distanceBetweenSegments) - maxAmountOfSegmentsInOneHalf - 1);
+
+            LineSegment[] meshSegments = new LineSegment[maxAmountOfSegmentsInOneHalf * 2 + 1];
+            for (int i = 0; i < meshSegments.Length; i++)
+            {
+                float x = start + distanceBetweenSegments * (i + 1);
+                LineSegment segment = new(new(x, Bounds.Bottom), new(x, Bounds.Top));
+                meshSegments[i] = Converter.CoordinateToPixel(segment);
+            }
+            return meshSegments;
         }
-        public (Point, Point)[] GetMeshYPoints()
+        public LineSegment[] GetMeshYSegments()
         {
+            int maxAmountOfSegmentsInOneHalf = 10;
+            float distanceBetweenSegments = Scale.Height / maxAmountOfSegmentsInOneHalf;
+            float start = distanceBetweenSegments *
+                (MathF.Round(Position.Y / distanceBetweenSegments) - maxAmountOfSegmentsInOneHalf - 1);
 
+            LineSegment[] meshSegments = new LineSegment[maxAmountOfSegmentsInOneHalf * 2 + 1];
+            for (int i = 0; i < meshSegments.Length; i++)
+            {
+                float y = start + distanceBetweenSegments * (i + 1);
+                LineSegment segment = new(new(Bounds.Left, y), new(Bounds.Right, y));
+                meshSegments[i] = Converter.CoordinateToPixel(segment);
+            }
+            return meshSegments;
         }
+
         public Point[] GetCoordinateDesignationXPoints()
         {
-            Point[] points = new Point[Scale.Width * 2];
+            PointF[] nums = new PointF[13];
+            float leftSideCoord = MathF.Round(Position.X - Scale.Width);
+            for (int i = 0; i < nums.Length; i++)
+            {
+                nums[i] = new PointF(leftSideCoord, 0);
+                leftSideCoord += MathF.Min(Scale.Width, Scale.Height) / 6;
+            }
+            Point[] convertedNums = new Point[nums.Length];
+            for (int i = 0; i < nums.Length; i++)
+                convertedNums[i] = Converter.CoordinateToPixel(nums[i]);
+            return convertedNums;
         }
         public Point[] GetCoordinateDesignationYPoints()
         {
-            Point[] points = new Point[Scale * 2];
-        }
-
-        public void DrawMeshAndNums(Graphics graphics, Pen pen)
-        {
-            Point centerPos = PointConverter.CoordinateToPixelPosition(new(0, 0));
-            centerPos.Offset(6, 6);
-            graphics.DrawString(0.ToString(), SystemFonts.DefaultFont,
-                Brushes.Black, centerPos);
-
-            for (float xNegative = Position.X; xNegative > Bounds.Left; xNegative -= 0.5f)
+            PointF[] nums = new PointF[13];
+            float bottomSideCoord = MathF.Round(Position.Y - Scale.Height);
+            for (int i = 0; i < nums.Length; i++)
             {
-                graphics.DrawLine(pen,
-                    PointConverter.CoordinateToPixelPosition(new(xNegative, Bounds.Top)),
-                    PointConverter.CoordinateToPixelPosition(new(xNegative, Bounds.Bottom)));
-
-                Point numPos = PointConverter.CoordinateToPixelPosition(new(xNegative, 0));
-                numPos.Offset(6, 6);
-
-                graphics.DrawString(xNegative.ToString("0.##"), SystemFonts.DefaultFont,
-                    Brushes.Black, numPos);
+                nums[i] = new PointF(0, bottomSideCoord);
+                bottomSideCoord += MathF.Min(Scale.Width, Scale.Height) / 6;
             }
-            for (float xPositive = Position.X; xPositive < Bounds.Right; xPositive += 0.5f)
-            {
-                graphics.DrawLine(pen,
-                    PointConverter.CoordinateToPixelPosition(new(xPositive, Bounds.Top)),
-                    PointConverter.CoordinateToPixelPosition(new(xPositive, Bounds.Bottom)));
-
-                Point numPos = PointConverter.CoordinateToPixelPosition(new(xPositive, 0));
-                numPos.Offset(6, 6);
-
-                graphics.DrawString(xPositive.ToString("0.##"), SystemFonts.DefaultFont,
-                    Brushes.Black, numPos);
-            }
-
-            for (float yNegative = Position.Y; yNegative > Bounds.Bottom; yNegative -= 0.5f)
-            {
-                graphics.DrawLine(pen,
-                    PointConverter.CoordinateToPixelPosition(new(Bounds.Left, yNegative)),
-                    PointConverter.CoordinateToPixelPosition(new(Bounds.Right, yNegative)));
-
-                Point numPos = PointConverter.CoordinateToPixelPosition(new(0, yNegative));
-                numPos.Offset(6, 6);
-
-                graphics.DrawString(yNegative.ToString("0.##"), SystemFonts.DefaultFont,
-                    Brushes.Black, numPos);
-            }
-            for (float yPositive = Position.Y; yPositive < Bounds.Top; yPositive += 0.5f)
-            {
-                graphics.DrawLine(pen,
-                    PointConverter.CoordinateToPixelPosition(new(Bounds.Left, yPositive)),
-                    PointConverter.CoordinateToPixelPosition(new(Bounds.Right, yPositive)));
-
-                Point numPos = PointConverter.CoordinateToPixelPosition(new(0, yPositive));
-                numPos.Offset(6, 6);
-
-                graphics.DrawString(yPositive.ToString("0.##"), SystemFonts.DefaultFont,
-                    Brushes.Black, numPos);
-            }
+            Point[] convertedNums = new Point[nums.Length];
+            for (int i = 0; i < nums.Length; i++)
+                convertedNums[i] = Converter.CoordinateToPixel(nums[i]);
+            return convertedNums;
         }
     }
 }
