@@ -30,9 +30,9 @@
         {
             ZoomIn = new Button();
             ZoomOut = new Button();
-            GraphDrawingField = new PictureBox();
+            DrawingField = new PictureBox();
             FunctionTextBox = new TextBox();
-            ((System.ComponentModel.ISupportInitialize)GraphDrawingField).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)DrawingField).BeginInit();
             SuspendLayout();
             // 
             // ZoomIn
@@ -59,16 +59,16 @@
             // 
             // GraphDrawingField
             // 
-            GraphDrawingField.BackColor = SystemColors.Control;
-            GraphDrawingField.Location = new Point(12, 12);
-            GraphDrawingField.Name = "GraphDrawingField";
-            GraphDrawingField.Size = new Size(600, 600);
-            GraphDrawingField.TabIndex = 2;
-            GraphDrawingField.TabStop = false;
-            GraphDrawingField.Paint += GraphPanel_Paint;
-            GraphDrawingField.MouseDown += GraphDrawingField_MouseDown;
-            GraphDrawingField.MouseMove += GraphDrawingField_MouseMove;
-            GraphDrawingField.MouseUp += GraphDrawingField_MouseUp;
+            DrawingField.BackColor = SystemColors.Control;
+            DrawingField.Location = new Point(12, 12);
+            DrawingField.Name = "GraphDrawingField";
+            DrawingField.Size = new Size(600, 600);
+            DrawingField.TabIndex = 2;
+            DrawingField.TabStop = false;
+            DrawingField.Paint += GraphPanel_Paint;
+            DrawingField.MouseDown += GraphDrawingField_MouseDown;
+            DrawingField.MouseMove += GraphDrawingField_MouseMove;
+            DrawingField.MouseUp += GraphDrawingField_MouseUp;
             // 
             // FunctionTextBox
             // 
@@ -87,12 +87,12 @@
             BackColor = SystemColors.ButtonShadow;
             ClientSize = new Size(940, 624);
             Controls.Add(FunctionTextBox);
-            Controls.Add(GraphDrawingField);
+            Controls.Add(DrawingField);
             Controls.Add(ZoomOut);
             Controls.Add(ZoomIn);
             Name = "MyForm";
             Text = "Form1";
-            ((System.ComponentModel.ISupportInitialize)GraphDrawingField).EndInit();
+            ((System.ComponentModel.ISupportInitialize)DrawingField).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -100,7 +100,7 @@
         #endregion
         private Button ZoomIn;
         private Button ZoomOut;
-        private PictureBox GraphDrawingField;
+        private PictureBox DrawingField;
         private TextBox FunctionTextBox;
     }
 }

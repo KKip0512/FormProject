@@ -20,8 +20,8 @@ namespace FormProject
 
             DoubleBuffered = true;
 
-            _system = new(GraphDrawingField.Size);
-            _bitmap = new(GraphDrawingField.Width, GraphDrawingField.Height);
+            _system = new(DrawingField.Size);
+            _bitmap = new(DrawingField.Width, DrawingField.Height);
             _graphics = Graphics.FromImage(_bitmap);
             _graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
@@ -29,14 +29,26 @@ namespace FormProject
             _meshPen = GetMeshPen();
         }
 
+        private LineSegment[] _meshXSegments;
+        private LineSegment[] _meshYSegments;
+        private float _sf = 5;
+
         private void GraphPanel_Paint(object sender, PaintEventArgs e)
         {
             _graphics.Clear(Color.White);
 
             //_system.DrawMeshAndNums(_graphics, _meshPen);
-            foreach (LineSegment line in _system.GetMeshXSegments())
+
+            float s = _system.Scale.Width;
+
+            float scale = s + _sf - s % _sf;
+
+            _meshXSegments = _system.GetMeshXSegments(scale, scale);
+            _meshYSegments = _system.GetMeshYSegments(scale, scale);
+
+            foreach (LineSegment line in _meshXSegments)
                 _graphics.DrawLine(_meshPen, line);
-            foreach (LineSegment line in _system.GetMeshYSegments())
+            foreach (LineSegment line in _meshYSegments)
                 _graphics.DrawLine(_meshPen, line);
 
             _graphics.DrawLine(_axisPen, _system.GetAbcissaSegment());
@@ -55,27 +67,23 @@ namespace FormProject
                     Point[] points = _system.GetPointsOfFunction(_expression);
                     _graphics.DrawLines(_graphOfFunctionPen, points);
                 }
-                catch { }
+                catch (Exception) { }
             }
 
-            GraphDrawingField.Image = _bitmap;
+            DrawingField.Image = _bitmap;
         }
 
         private void ZoomIn_Click(object sender, EventArgs e)
         {
-            if (MathF.Max(_system.Scale.Width, _system.Scale.Height) <= 1f)
-                _system.Rescale(_system.Scale.Width / 2f, _system.Scale.Height / 2f);
-            else
-                _system.Rescale(_system.Scale.Width - 1f, _system.Scale.Height - 1f);
-            GraphDrawingField.Invalidate();
+            _system.Rescale(_system.Scale.Width / 2f, _system.Scale.Height / 2f);
+            _sf /= 2f;
+            DrawingField.Invalidate();
         }
         private void ZoomOut_Click(object sender, EventArgs e)
         {
-            if (MathF.Max(_system.Scale.Width, _system.Scale.Height) <= 1f)
-                _system.Rescale(_system.Scale.Width * 2f, _system.Scale.Height * 2f);
-            else
-                _system.Rescale(_system.Scale.Width + 1f, _system.Scale.Height + 1f);
-            GraphDrawingField.Invalidate();
+            _system.Rescale(_system.Scale.Width * 2f, _system.Scale.Height * 2f);
+            _sf *= 2f;
+            DrawingField.Invalidate();
         }
 
         private void FunctionTextBox_TextChanged(object sender, EventArgs e)

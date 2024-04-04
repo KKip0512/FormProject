@@ -33,6 +33,7 @@ namespace FormProject.Classes
             {
                 float xCoord = Converter.PixelToCoordinate(new Point(x, 0)).X;
                 float yCoord = (float)FunctionCompiler.GetY(expression, xCoord);
+                if (float.IsNaN(yCoord)) yCoord = 0f;
                 //if (systemY >= Scale) continue;
                 points[x / stride] = Converter.CoordinateToPixel(new PointF(xCoord, yCoord));
             }
@@ -59,14 +60,11 @@ namespace FormProject.Classes
             return new LineSegment(ordinateStart, ordinateEnd);
         }
 
-        public LineSegment[] GetMeshXSegments()
+        public LineSegment[] GetMeshXSegments(float scaleWidth, float scaleHeight)
         {
-            const int maxAmountOfSegmentsInOneHalf = 10;
-            float distanceBetweenSegments = Scale.Width / maxAmountOfSegmentsInOneHalf;
+            int maxAmountOfSegmentsInOneHalf = 10;
+            float distanceBetweenSegments = MathF.Max(scaleWidth, scaleHeight) / maxAmountOfSegmentsInOneHalf;
 
-            //float start = distanceBetweenSegments *
-            //    (MathF.Round(Position.X / distanceBetweenSegments) - maxAmountOfSegmentsInOneHalf - 1);
-            float s = MathF.Max(Scale.Width, Scale.Height) / 10 + 1;
             float start = distanceBetweenSegments *
                 (MathF.Round(Position.X / distanceBetweenSegments) - maxAmountOfSegmentsInOneHalf - 1);
 
@@ -79,10 +77,12 @@ namespace FormProject.Classes
             }
             return meshSegments;
         }
-        public LineSegment[] GetMeshYSegments()
+
+        public LineSegment[] GetMeshYSegments(float scaleWidth, float scaleHeight)
         {
             int maxAmountOfSegmentsInOneHalf = 10;
-            float distanceBetweenSegments = Scale.Height / maxAmountOfSegmentsInOneHalf;
+            float distanceBetweenSegments = MathF.Max(scaleWidth, scaleHeight) / maxAmountOfSegmentsInOneHalf;
+
             float start = distanceBetweenSegments *
                 (MathF.Round(Position.Y / distanceBetweenSegments) - maxAmountOfSegmentsInOneHalf - 1);
 
