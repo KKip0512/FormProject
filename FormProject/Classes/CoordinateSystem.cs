@@ -96,33 +96,22 @@ namespace FormProject.Classes
             return meshSegments;
         }
 
-        public Point[] GetCoordinateDesignationXPoints()
+        public Point[] GetCoordinateDesignationXPoints(LineSegment[] meshXSegments)
         {
-            PointF[] nums = new PointF[13];
-            float leftSideCoord = MathF.Round(Position.X - Scale.Width);
-            for (int i = 0; i < nums.Length; i++)
-            {
-                nums[i] = new PointF(leftSideCoord, 0);
-                leftSideCoord += MathF.Min(Scale.Width, Scale.Height) / 6;
-            }
-            Point[] convertedNums = new Point[nums.Length];
-            for (int i = 0; i < nums.Length; i++)
-                convertedNums[i] = Converter.CoordinateToPixel(nums[i]);
-            return convertedNums;
+            Point[] points = new Point[meshXSegments.Length];
+            for (int i = 0; i < meshXSegments.Length; i++)
+                points[i] = new((int)MathF.Round(meshXSegments[i].Start.X), Converter.CoordinateToPixel(new PointF(0f, 0f)).Y);
+
+            return points;
         }
-        public Point[] GetCoordinateDesignationYPoints()
+
+        public Point[] GetCoordinateDesignationYPoints(LineSegment[] meshYSegments)
         {
-            PointF[] nums = new PointF[13];
-            float bottomSideCoord = MathF.Round(Position.Y - Scale.Height);
-            for (int i = 0; i < nums.Length; i++)
-            {
-                nums[i] = new PointF(0, bottomSideCoord);
-                bottomSideCoord += MathF.Min(Scale.Width, Scale.Height) / 6;
-            }
-            Point[] convertedNums = new Point[nums.Length];
-            for (int i = 0; i < nums.Length; i++)
-                convertedNums[i] = Converter.CoordinateToPixel(nums[i]);
-            return convertedNums;
+            Point[] points = new Point[meshYSegments.Length];
+            for (int i = 0; i < meshYSegments.Length; i++)
+                points[i] = new(Converter.CoordinateToPixel(new PointF(0f, 0f)).X, (int)MathF.Round(meshYSegments[i].Start.Y));
+
+            return points;
         }
     }
 }

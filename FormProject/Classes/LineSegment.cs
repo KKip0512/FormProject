@@ -6,13 +6,13 @@
 
         public PointF End{ get; set; }
 
-        public readonly float XProjection => MathF.Abs(Start.X - End.X);
+        public readonly float XProjectionLength => MathF.Abs(Start.X - End.X);
 
-        public readonly float YProjection => MathF.Abs(Start.Y - End.Y);
+        public readonly float YProjectionLenth => MathF.Abs(Start.Y - End.Y);
 
-        public readonly float Length => MathF.Sqrt(MathF.Pow(XProjection, 2) + MathF.Pow(YProjection, 2));
+        public readonly float Length => MathF.Sqrt(MathF.Pow(XProjectionLength, 2) + MathF.Pow(YProjectionLenth, 2));
 
-        public readonly float Angle => MathF.Atan2(YProjection, XProjection);
+        public readonly float Angle => MathF.Atan2(YProjectionLenth, XProjectionLength);
 
         public LineSegment(PointF start, PointF end)
         {

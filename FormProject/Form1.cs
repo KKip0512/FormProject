@@ -59,10 +59,10 @@ namespace FormProject
             _graphics.DrawLine(_axisPen, _system.GetAbcissaSegment());
             _graphics.DrawLine(_axisPen, _system.GetOrdinateSegment());
 
-            /*foreach (Point position in _system.GetCoordinateDesignationXPoints())
-                _graphics.DrawString("0", SystemFonts.DefaultFont, Brushes.DarkRed, position);
-            foreach (Point position in _system.GetCoordinateDesignationYPoints())
-                _graphics.DrawString("0", SystemFonts.DefaultFont, Brushes.DarkRed, position);*/
+            foreach (Point p in _system.GetCoordinateDesignationXPoints(_meshXSegments))
+                _graphics.DrawString(_system.Converter.PixelToCoordinate(p).X.ToString(), SystemFonts.DefaultFont, Brushes.DarkRed, p);
+            /*foreach (Point p in _system.GetCoordinateDesignationYPoints(_meshYSegments))
+                _graphics.DrawString(_system.Converter.PixelToCoordinate(p).Y.ToString(), SystemFonts.DefaultFont, Brushes.DarkRed, p);*/
 
             //Pow(Abs(Min(Abs(Sin(x * PI/2)), 1-Abs(x))), 0.5)
             if (_expression != null)
