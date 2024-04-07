@@ -31,7 +31,10 @@ namespace FormProject
 
         private LineSegment[] _meshXSegments;
         private LineSegment[] _meshYSegments;
-        private float _sf = 5;
+
+        private float _sx = 0;
+        private float _sy = 0;
+        private int _sf = 0;
 
         private void GraphPanel_Paint(object sender, PaintEventArgs e)
         {
@@ -39,12 +42,14 @@ namespace FormProject
 
             //_system.DrawMeshAndNums(_graphics, _meshPen);
 
-            float s = _system.Scale.Width;
+            if (_sf % 5 == 0)
+            {
+                _sx = _system.Scale.Width * 2f;
+                _sy = _system.Scale.Height * 2f;
+            }
 
-            float scale = s + _sf - s % _sf;
-
-            _meshXSegments = _system.GetMeshXSegments(scale, scale);
-            _meshYSegments = _system.GetMeshYSegments(scale, scale);
+            _meshXSegments = _system.GetMeshXSegments(_sx, _sy);
+            _meshYSegments = _system.GetMeshYSegments(_sx, _sy);
 
             foreach (LineSegment line in _meshXSegments)
                 _graphics.DrawLine(_meshPen, line);
@@ -73,16 +78,18 @@ namespace FormProject
             DrawingField.Image = _bitmap;
         }
 
+        private readonly float _rescalingStep = MathF.Pow(2, 0.2f);
+
         private void ZoomIn_Click(object sender, EventArgs e)
         {
-            _system.Rescale(_system.Scale.Width / 2f, _system.Scale.Height / 2f);
-            _sf /= 2f;
+            _system.Rescale(_system.Scale.Width / _rescalingStep, _system.Scale.Height / _rescalingStep);
+            _sf -= 1;
             DrawingField.Invalidate();
         }
         private void ZoomOut_Click(object sender, EventArgs e)
         {
-            _system.Rescale(_system.Scale.Width * 2f, _system.Scale.Height * 2f);
-            _sf *= 2f;
+            _system.Rescale(_system.Scale.Width * _rescalingStep, _system.Scale.Height * _rescalingStep);
+            _sf += 1;
             DrawingField.Invalidate();
         }
 
