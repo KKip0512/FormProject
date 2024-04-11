@@ -39,5 +39,14 @@
             PointF end = PixelToCoordinate(new Point((int)pixelSegment.End.X, (int)pixelSegment.End.Y));
             return new LineSegment(start, end);
         }
+
+        public Point[] CoordinateToPixel(PointF[] coordinates)
+        {
+            Point[] result = new Point[coordinates.Length];
+            for (int i = 0; i < coordinates.Length; i++)
+                result[i] = CoordinateToPixel(coordinates[i]);
+
+            return result;
+        }
     }
 }

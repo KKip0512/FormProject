@@ -6,12 +6,12 @@
         {
             { "",            num => num },
             { "abs",         Math.Abs },
-            { "acos",        Math.Acos },
-            { "acosh",       Math.Acosh },
-            { "asin",        Math.Asin },
-            { "asinh",       Math.Asinh },
-            { "atan",        Math.Atan },
-            { "atanh",       Math.Atanh },
+            { "arccos",        Math.Acos },
+            { "arccosh",       Math.Acosh },
+            { "arcsin",        Math.Asin },
+            { "arcsinh",       Math.Asinh },
+            { "arctg",        Math.Atan },
+            { "arctgh",       Math.Atanh },
             { "bitDecrement",Math.BitDecrement },
             { "bitIncrement",Math.BitIncrement },
             { "cbrt",        Math.Cbrt },
@@ -26,9 +26,11 @@
             { "sin",         Math.Sin },
             { "sinh",        Math.Sinh },
             { "sqrt",        Math.Sqrt },
-            { "tan",         Math.Tan },
-            { "tanh",        Math.Tanh },
-            { "truncate",    Math.Truncate }
+            { "tg",         Math.Tan },
+            { "tgh",        Math.Tanh },
+            { "truncate",    Math.Truncate },
+            { "ctg", (num) => 1d / Math.Tan(num) },
+            { "arcctg", (num) => 1d / Math.Atan(num) }
         };
         public static readonly Dictionary<string, Func<double, double, double>> possibleFunctions2Args = new()
         {

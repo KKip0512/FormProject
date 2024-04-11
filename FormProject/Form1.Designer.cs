@@ -57,11 +57,11 @@
             ZoomOut.UseVisualStyleBackColor = true;
             ZoomOut.Click += ZoomOut_Click;
             // 
-            // GraphDrawingField
+            // DrawingField
             // 
             DrawingField.BackColor = SystemColors.Control;
             DrawingField.Location = new Point(12, 12);
-            DrawingField.Name = "GraphDrawingField";
+            DrawingField.Name = "DrawingField";
             DrawingField.Size = new Size(600, 600);
             DrawingField.TabIndex = 2;
             DrawingField.TabStop = false;
